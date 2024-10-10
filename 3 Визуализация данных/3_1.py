@@ -3,19 +3,19 @@ import re
 from datetime import datetime
 import datetime as dt
 
+
 def get_data(path):
-    pattern = r'(\d{2}:\d{2},\d{3}) \[acp\] C B00000000004 <---> .*?KEEP pressure=(\d+),gard=(\d+\.\d+)'
+    pattern = r'B00000000004 <--->.*?KEEP pressure=(\d+),gard=(\d+\.\d+)'
     results = []
 
-    # Открываем файл и читаем его содержимое
     with open('n_log2.txt', 'r') as file:
         for line in file:
             match = re.search(pattern, line)
             if match:
                 results.append({
                     'time_stamp': datetime.strptime(line[:8], '%H:%M:%S'),
-                    'pressure': match.group(2),
-                    'gard': match.group(3)
+                    'pressure': match.group(1),
+                    'gard': match.group(2)
                 })
 
     return results
@@ -50,32 +50,29 @@ def process_data(data_list):
 
 def draw_graphics(data):
     timestamps = [i for i in range(len(data))]
-    parameter1 = [point[1] for point in data]
-    parameter2 = [point[2] for point in data]
+    pressure = [point[1] for point in data]
+    gard = [point[2] for point in data]
 
     plt.figure(figsize=(14, 6))
 
     # график для pressure
     plt.subplot(1, 2, 1)
-    plt.plot(timestamps, parameter1, marker='o', label='pressure', color='blue')
+    plt.plot(timestamps, pressure, marker='o', label='pressure', color='blue')
     plt.xlabel('time')
     plt.ylabel('pressure')
     plt.title('График для параметра pressure')
     plt.legend()
-    plt.xticks(rotation=45)
     plt.grid()
 
     # график для gard
     plt.subplot(1, 2, 2)
-    plt.plot(timestamps, parameter2, marker='o', label='gard', color='orange')
+    plt.plot(timestamps, gard, marker='o', label='gard', color='orange')
     plt.xlabel('time')
     plt.ylabel('gard')
     plt.title('График для параметра gard')
     plt.legend()
-    plt.xticks(rotation=45)
     plt.grid()
 
-    # Показать графики
     plt.tight_layout()
     plt.show()
 
